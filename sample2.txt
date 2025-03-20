@@ -1,0 +1,2518 @@
+===== File: clients\.env ===== 
+REACT_APP_GOOGLE_CLIENT_ID = '220287336327-lqecirr1ui4sm6ave7n44fh42ag3usub.apps.googleusercontent.com'
+REACT_APP_SERVER_URL='http://localhost:8000'
+BASE_URL=http://localhost:3000,http://192.168.231.168
+ 
+ 
+===== File: clients\package.json ===== 
+{
+  "name": "clients",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@chakra-ui/react": "^2.7.1",
+    "@emoji-mart/data": "^1.1.2",
+    "@emoji-mart/react": "^1.1.1",
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/material": "^5.11.4",
+    "@reduxjs/toolkit": "^1.9.1",
+    "@testing-library/jest-dom": "^5.16.5",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.2.2",
+    "dotenv": "^16.0.3",
+    "emoji-mart": "^5.5.2",
+    "framer-motion": "^10.12.18",
+    "gapi-script": "^1.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-google-login": "^5.2.2",
+    "react-icons": "^4.7.1",
+    "react-loading-skeleton": "^3.2.0",
+    "react-notification-badge": "^1.5.1",
+    "react-redux": "^8.0.5",
+    "react-router": "^6.9.0",
+    "react-router-dom": "^6.6.2",
+    "react-scripts": "5.0.1",
+    "react-scrollable-feed": "^1.3.1",
+    "react-toastify": "^9.1.1",
+    "react-transition-group": "^4.4.5",
+    "socket.io-client": "^4.5.4",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.2.4"
+  }
+}
+ 
+ 
+===== File: clients\public\index.html ===== 
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/logo.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta
+      name="description"
+      content="Web site created using create-react-app"
+    />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo.png" />
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <!-- sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <!-- sans -->
+    <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+    <title>Talk Time</title>
+    <style>
+      * {
+        font-family: 'Inter', sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+
+    <!--
+      This HTML file is a template.
+      If you open it directly in the browser, you will see an empty page.
+
+      You can add webfonts, meta tags, or analytics to this file.
+      The build step will place the bundled scripts into the <body> tag.
+
+      To begin the development, run `npm start` or `yarn start`.
+      To create a production bundle, use `npm run build` or `yarn build`.
+    -->
+  </body>
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+</html>
+ 
+ 
+===== File: clients\src\apis\auth.js ===== 
+import axios from 'axios';
+import { toast } from 'react-toastify';
+const API = (token) =>
+  axios.create({
+    baseURL: process.env.REACT_APP_SERVER_URL,
+    headers: { Authorization: token },
+  });
+let url = process.env.REACT_APP_SERVER_URL;
+export const loginUser = async (body) => {
+  try {
+    return await axios.post(`${url}/auth/login`, body);
+  } catch (error) {
+    console.log('error in loginuser api');
+  }
+};
+export const googleAuth = async (body) => {
+  try {
+    return await axios.post(`${url}/api/google`, body);
+  } catch (error) {
+    console.log(error);
+  }
+};
+export const registerUser = async (body) => {
+  try {
+    return await axios.post(`${url}/auth/register`, body);
+  } catch (error) {
+    console.log('error in register api');
+  }
+};
+export const validUser = async () => {
+  try {
+    const token = localStorage.getItem('userToken');
+
+    const { data } = await API(token).get(`/auth/valid`, {
+      headers: { Authorization: token },
+    });
+    return data;
+  } catch (error) {
+    console.log('error in valid user api');
+  }
+};
+export const searchUsers = async (id) => {
+  try {
+    const token = localStorage.getItem('userToken');
+
+    return await API(token).get(`/api/user?search=${id}`);
+  } catch (error) {
+    console.log('error in search users api');
+  }
+};
+export const updateUser = async (id, body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+
+    const { data } = await API(token).patch(`/api/users/update/${id}`, body);
+    return data;
+  } catch (error) {
+    console.log('error in update user api');
+    toast.error('Something Went Wrong.try Again!');
+  }
+};
+export const checkValid = async () => {
+  const data = await validUser();
+  if (!data?.user) {
+    window.location.href = '/login';
+  } else {
+    window.location.href = '/chats';
+  }
+};
+ 
+ 
+===== File: clients\src\apis\chat.js ===== 
+import axios from 'axios';
+import { toast } from 'react-toastify';
+const API = (token) =>
+  axios.create({
+    baseURL: process.env.REACT_APP_SERVER_URL,
+    headers: { Authorization: token },
+  });
+export const acessCreate = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+
+    const { data } = await API(token).post('/api/chat', body);
+    console.log(data);
+    return data;
+  } catch (error) {
+    console.log('error in access create api');
+  }
+};
+export const fetchAllChats = async () => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).get('/api/chat');
+    return data;
+  } catch (error) {
+    console.log('error in fetch all chats api');
+  }
+};
+export const createGroup = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).post('/api/chat/group', body);
+    toast.success(`${data.chatName} Group Created`);
+    return data;
+  } catch (error) {
+    console.log('error in create group api');
+  }
+};
+export const addToGroup = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).patch('/api/chat/groupAdd', body);
+    return data;
+  } catch (error) {
+    console.log('error in addtogroup api');
+  }
+};
+export const renameGroup = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).patch('/api/chat/group/rename', body);
+    return data;
+  } catch (error) {
+    console.log('error in rename group api');
+  }
+};
+export const removeUser = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).patch('/api/chat/groupRemove', body);
+    return data;
+  } catch (error) {
+    console.log('error in remove user api');
+  }
+};
+ 
+ 
+===== File: clients\src\apis\messages.js ===== 
+import axios from 'axios';
+const API = (token) =>
+  axios.create({
+    baseURL: process.env.REACT_APP_SERVER_URL,
+    headers: { Authorization: token },
+  });
+export const sendMessage = async (body) => {
+  try {
+    const token = localStorage.getItem('userToken');
+    const { data } = await API(token).post('/api/message/', body);
+    return data;
+  } catch (error) {
+    console.log('error in sendmessage api' + error);
+  }
+};
+export const fetchMessages = async (id) => {
+  try {
+    const token = localStorage.getItem('userToken');
+
+    const { data } = await API(token).get(`/api/message/${id}`);
+    return data;
+  } catch (error) {
+    console.log('error in fetch Message API ' + error);
+  }
+};
+ 
+ 
+===== File: clients\src\App.js ===== 
+import Login from './pages/Login';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import Regsiter from './pages/Regsiter';
+import Home from './pages/Home';
+import Start from './components/Start';
+
+function App() {
+  return (
+    <div className="bg-[#F8F4EA]">
+      <Router>
+        <Routes>
+          <Route exact path="/login" element={<Login />} />
+          <Route exact path="/register" element={<Regsiter />} />
+          <Route exact path="/chats" element={<Home />} />
+          <Route exact path="/" element={<Start />} />
+        </Routes>
+      </Router>
+    </div>
+  );
+}
+
+export default App;
+ 
+ 
+===== File: clients\src\App.test.js ===== 
+import { render, screen } from '@testing-library/react';
+import App from './App';
+
+test('renders learn react link', () => {
+  render(<App />);
+  const linkElement = screen.getByText(/learn react/i);
+  expect(linkElement).toBeInTheDocument();
+});
+ 
+ 
+===== File: clients\src\components\Contacts.jsx ===== 
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { setActiveChat, fetchChats } from '../redux/chatsSlice';
+import { getChatName, getChatPhoto, timeSince } from '../utils/logics';
+import NoContacts from './ui/NoContacts';
+
+const aDay = 24 * 60 * 60 * 1000;
+
+function Contacts() {
+  const { chats, activeChat } = useSelector((state) => state.chats);
+  const dispatch = useDispatch();
+  const activeUser = useSelector((state) => state.activeUser);
+
+  useEffect(() => {
+    dispatch(fetchChats());
+  }, [dispatch]);
+
+  // Add a loading or error state check
+  if (!chats) {
+    return <div>Loading chats...</div>; // Or a spinner
+  }
+
+  return (
+    <div className="flex flex-col -space-y-1 overflow-y-scroll scrollbar-hide h-[87vh] pb-10">
+      {chats.length > 0 ? (
+        chats.map((chat) => (
+          <div
+            onClick={() => dispatch(setActiveChat(chat))}
+            key={chat._id}
+            className={`flex items-center justify-between sm:gap-x-1 md:gap-x-1 mt-5 ${
+              activeChat?._id === chat._id ? 'bg-[#fafafa]' : 'bg-[#fff]'
+            } cursor-pointer py-4 px-2`}
+          >
+            <div className="flex items-center gap-x-3 sm:gap-x-1 md:gap-x-3">
+              <img
+                className="w-12 h-12 sm:w-12 sm:h-12 rounded-[30px] shadow-lg object-cover"
+                src={getChatPhoto(chat, activeUser)}
+                alt="Chat avatar"
+              />
+              <div>
+                <h5 className="text-[13.6px] sm:text-[16px] text-[#2b2e33] font-bold">
+                  {getChatName(chat, activeUser)}
+                </h5>
+                <p className="text-[13.6px] sm:text-[13.5px] font-medium text-[#56585c]">
+                  {chat.latestMessage?.message
+                    ? chat.latestMessage.message.length > 30
+                      ? chat.latestMessage.message.slice(0, 30) + '...'
+                      : chat.latestMessage.message
+                    : 'No messages yet'}
+                </p>
+              </div>
+            </div>
+            <div className="flex flex-col items-end gap-y-[8px]">
+              <p className="text-[12.4px] sm:text-[12px] font-normal text-[#b0b2b3] tracking-wide">
+                {timeSince(new Date(Date.parse(chat.updatedAt) - aDay))}
+              </p>
+            </div>
+          </div>
+        ))
+      ) : (
+        <NoContacts />
+      )}
+    </div>
+  );
+}
+
+export default Contacts; 
+ 
+===== File: clients\src\components\Group.jsx ===== 
+import React, { useState } from 'react'
+import { BsPlusLg } from "react-icons/bs"
+import { Modal, Box } from "@mui/material"
+import { searchUsers } from '../apis/auth';
+import { RxCross2 } from "react-icons/rx"
+import { useEffect } from 'react';
+import { createGroup } from '../apis/chat';
+import { fetchChats } from '../redux/chatsSlice';
+import { useDispatch } from 'react-redux';
+import Search from './group/Search';
+
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  minWidth: 400,
+  bgcolor: 'background.paper',
+
+  boxShadow: 24,
+  p: 2
+
+};
+function Group() {
+  const dispatch = useDispatch()
+  const [open, setOpen] = useState(false);
+  const [chatName, setChatName] = useState("")
+  const [searchResults, setSearchResults] = useState([])
+  const [search, setSearch] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [selectedUser, setSelectedUsers] = useState([])
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => {
+    setOpen(false)
+    setSearch("")
+    setSelectedUsers([])
+  }
+  const handleFormSearch = async (e) => {
+    setSearch(e.target.value)
+  }
+  const handleClick = (e) => {
+    if (selectedUser.includes(e)) {
+      return
+    }
+    setSelectedUsers([...selectedUser, e])
+  }
+
+  const deleteSelected = (ele) => {
+    setSelectedUsers(selectedUser.filter((e) => e._id !== ele._id))
+  }
+  const handleSubmit = async () => {
+    if (selectedUser.length >= 2) {
+
+      await createGroup({
+        chatName,
+        users: JSON.stringify(selectedUser.map((e) => e._id))
+      })
+      dispatch(fetchChats())
+      handleClose()
+    }
+  }
+  useEffect(() => {
+    const searchChange = async () => {
+      setIsLoading(true)
+      const { data } = await searchUsers(search)
+      setSearchResults(data)
+      setIsLoading(false)
+    }
+    searchChange()
+  }, [search])
+  useEffect(() => {
+  }, [])
+  return (
+    <>
+      <button className='mt-1 transition duration-150 ease-in-out' onClick={handleOpen}>
+
+        <div className='flex justify-start border-r-2'>
+          <button className='text-[11px] font-normal tracking-wide flex items-center gap-x-1 bg-[#f6f6f6] text-[#1f2228] py-1 -mb-7 mt-2  px-2'>New Group <BsPlusLg /></button>
+        </div>
+      </button>
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <h5 className='text-[18px] text-[#111b21] font-medium text-center'>Create A Group</h5>
+
+          <form onSubmit={(e) => e.preventDefault()} className='flex flex-col gap-y-3 mt-3'>
+
+            <input onChange={(e) => setChatName(e.target.value)} className="border-[#c4ccd5] border-[1px] text-[13.5px] py-[4px] px-2 w-[100%]" type="text" name="chatName" placeholder="Group Name" required />
+            <input onChange={handleFormSearch} className="border-[#c4ccd5] border-[1px] text-[13.5px] py-[4px] px-2 w-[100%]" type="text" name="users" placeholder="add users" />
+            <div className='flex -mt-2'>
+
+              {
+                selectedUser?.map((e) => {
+                  return (
+                    <button key={e} onClick={() => deleteSelected(e)} className='flex items-center gap-x-1 bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-green-400 border border-green-400'>
+                      <span >{e.name}</span>
+                      <RxCross2 />
+                    </button>
+                  )
+                })
+              }
+            </div>
+
+
+            <Search isLoading={isLoading} handleClick={handleClick} search={search} searchResults={searchResults} />
+
+            <div className='flex justify-end mt-3'>
+              <button onClick={handleSubmit} className='bg-[#0086ea] text-[#fff] text-[15px] font-medium px-2 py-1 tracking-wide' type='submit'>Create</button>
+            </div>
+          </form>
+
+
+        </Box>
+      </Modal>
+    </>
+  )
+}
+
+export default Group 
+ 
+===== File: clients\src\components\MessageHistory.jsx ===== 
+import React from 'react'
+import { useSelector } from 'react-redux'
+import ScrollableFeed from "react-scrollable-feed"
+import { isSameSender, isSameSenderMargin, isSameUser, isLastMessage } from '../utils/logics'
+import { Tooltip } from "@chakra-ui/tooltip";
+import { Avatar } from "@chakra-ui/avatar";
+import "../pages/home.css"
+function MessageHistory({ messages }) {
+  const activeUser = useSelector((state) => state.activeUser)
+
+  return (
+    <>
+      <ScrollableFeed className='scrollbar-hide'>
+        {messages &&
+          messages.map((m, i) => (
+
+            <div className='flex items-center gap-x-[6px]' key={m._id} >
+              {(isSameSender(messages, m, i, activeUser.id) ||
+                isLastMessage(messages, i, activeUser.id)) && (
+                  <Tooltip label={m.sender?.name} placement="bottom-start" hasArrow>
+                    <Avatar
+                      style={{ width: "32px", height: "32px" }}
+                      mt="43px"
+                      mr={1}
+
+                      cursor="pointer"
+                      name={m.sender?.name}
+                      src={m.sender?.profilePic}
+                      borderRadius="25px"
+                    />
+                  </Tooltip>
+
+                )}
+              <span className='tracking-wider text-[15px]  font-medium'
+                style={{
+                  backgroundColor: `${m.sender._id === activeUser.id ? "#268d61" : "#f0f0f0"
+                    }`,
+                  marginLeft: isSameSenderMargin(messages, m, i, activeUser.id),
+                  marginTop: isSameUser(messages, m, i, activeUser.id) ? 3 : 10,
+                  borderRadius: `${m.sender._id === activeUser.id ? "10px 10px 0px 10px" : "10px 10px 10px 0"}`,
+                  padding: "10px 18px",
+                  maxWidth: "460px",
+                  color: `${m.sender._id === activeUser.id ? "#ffff" : "#848587"}`
+                }}
+              >
+                {m.message}
+              </span>
+            </div>
+          ))
+        }
+
+      </ScrollableFeed >
+    </>
+  )
+}
+
+export default MessageHistory 
+ 
+===== File: clients\src\components\Model.jsx ===== 
+import React, { useState } from 'react'
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
+import { useDispatch, useSelector } from 'react-redux';
+import { RxCross2 } from "react-icons/rx"
+import { useEffect } from 'react';
+import { searchUsers } from '../apis/auth';
+import { addToGroup, removeUser, renameGroup } from '../apis/chat';
+import { fetchChats } from '../redux/chatsSlice';
+import Search from './group/Search';
+import { getChatName, getChatPhoto } from '../utils/logics';
+const style = {
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: "fit-content",
+  bgcolor: 'background.paper',
+  boxShadow: 24,
+  p: 2,
+};
+function Model(props) {
+  const [open, setOpen] = useState(false);
+  const dispatch = useDispatch()
+  const [searchResults, setSearchResults] = useState([])
+  const [name, setName] = useState("")
+  const [search, setSearch] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
+  const [members, setMembers] = useState([])
+  const { activeChat } = useSelector((state) => state.chats)
+  const activeUser = useSelector((state) => state.activeUser)
+
+  const handleOpen = () => {
+    setOpen(true);
+    setName(getChatName(activeChat, activeUser))
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setSearch("")
+    setSearchResults([])
+  };
+  const handleClick = async (e) => {
+    if (members.includes(e)) {
+      return
+    }
+    await addToGroup({ userId: e?._id, chatId: activeChat?._id })
+    setMembers([...members, e])
+
+  }
+
+  const updateBtn = async () => {
+    if (name) {
+      let data = await renameGroup({ chatId: activeChat._id, chatName: name })
+      if (data) {
+        dispatch(fetchChats())
+        setOpen(false)
+      }
+    }
+    setOpen(false)
+  }
+  const deleteSelected = async (ele) => {
+    const res = await removeUser({ chatId: activeChat._id, userId: ele._id })
+    if (res._id) {
+      setMembers(members.filter((e) => e._id !== ele._id))
+
+      dispatch(fetchChats())
+      setOpen(false)
+
+    }
+    return
+  }
+  const leaveGroup = async () => {
+    const res = await removeUser({ chatId: activeChat._id, userId: activeUser.id })
+    if (res._id) {
+      dispatch(fetchChats())
+      setOpen(false)
+    }
+    return
+  }
+  useEffect(() => {
+    setMembers(activeChat?.users.map((e) => e))
+  }, [activeChat])
+  useEffect(() => {
+    const searchChange = async () => {
+      setIsLoading(true)
+      const { data } = await searchUsers(search)
+      setSearchResults(data)
+      setIsLoading(false)
+    }
+    searchChange()
+  }, [search])
+  return (
+    <>
+
+
+
+
+      <button onClick={handleOpen}>
+        <img className='w-[40px] h-[40px] rounded-[25px]' alt="Profile Pic" src={getChatPhoto(activeChat, activeUser)} />
+
+      </button>
+      {
+        activeChat?.isGroup ?
+
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              <h5 className='text-[22px] font-semibold tracking-wide text-center text-[#111b21]'>{getChatName(activeChat, activeUser)}</h5>
+              <div>
+                <h6 className='text-[14px] text-[#111b21] tracking-wide font-semibold'>Members</h6>
+                <div className='flex flex-wrap gap-y-2'>
+                  {
+                    members.length > 0 && members?.map((e) => {
+                      return (
+                        <button button className='flex items-center gap-x-1 bg-green-100 text-green-800 text-xs font-medium mr-2 px-2.5 py-0.5 rounded dark:bg-gray-700 dark:text-green-400 border border-green-400' >
+                          <span className='text-[10px]'>{e._id === activeUser.id ? "You" : e.name}</span>
+                          <RxCross2 onClick={() => deleteSelected(e)} />
+                        </button>
+                      )
+                    })
+                  }
+                </div>
+                <div>
+                  <form className='mt-5 flex flex-col gap-y-3' onSubmit={(e) => e.preventDefault()}>
+                    <input onChange={(e) => setName(e.target.value)} value={name} className="border-[#c4ccd5] border-[1px] text-[13.5px] py-[4px] px-2 w-[100%]" type="text" name="chatName" placeholder="Group Name" required />
+                    <input onChange={(e) => setSearch(e.target.value)} className="border-[#c4ccd5] border-[1px] text-[13.5px] py-[4px] px-2 w-[100%]" type="text" name="users" placeholder="add users" />
+                  </form>
+                  {/* <div style={{ display: search ? "" : "none" }} className='h-[fit-content] bg-[#fff] flex flex-col gap-y-3 pt-3 px-2'> */}
+
+                  <Search isLoading={isLoading} handleClick={handleClick} search={search} searchResults={searchResults} />
+
+                  <div className='flex justify-end gap-x-3 mt-3'>
+                    <button onClick={updateBtn} className='bg-[#0086ea] transition hover:bg-[#00A1C9]  px-4 py-1 text-[10.6px] tracking-wide text-[#fff]'>Update</button>
+                    <button onClick={() => leaveGroup()} className='bg-[#880808] hover:bg-[#A52A2A] transition delay-150 px-4 py-1 text-[10.6px] tracking-wide text-[#fff]'>Leave</button>
+
+                  </div>
+                </div>
+              </div>
+            </Box>
+          </Modal> : <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={style}>
+              <div className='w-[250px] h-[250px] flex flex-col items-center justify-center -mt-4'>
+                <img className='w-[70px] h-[70px] rounded-[35px] shadow-lg' src={getChatPhoto(activeChat, activeUser)} alt="" />
+                <h2 className='text-[17px] tracking-wider font-semibold text-[#313439]'>{getChatName(activeChat, activeUser)}</h2>
+
+                <h3 className='text-[14px] font-semibold text-[#268d61]'>{!activeChat?.isGroup && activeChat?.users[0]?._id === activeUser.id ? activeChat?.users[1]?.email : activeChat?.users[0]?.email}</h3>
+                <div className='flex flex-col items-start'>
+
+                  <h5 className='text-[13px]'>{!activeChat?.isGroup && activeChat?.users[0]?._id === activeUser.id ? activeChat?.users[1]?.bio : activeChat?.users[0]?.bio}</h5>
+                </div>
+              </div>
+
+
+            </Box>
+          </Modal>
+      }
+
+
+
+
+    </>
+  )
+}
+
+export default Model 
+ 
+===== File: clients\src\components\Profile.jsx ===== 
+import React, { useState } from 'react'
+import { IoArrowBack } from "react-icons/io5"
+import { useDispatch, useSelector } from 'react-redux'
+import { setShowProfile } from '../redux/profileSlice'
+import { IoMdLogOut } from "react-icons/io"
+import InputEdit from './profile/InputEdit'
+import { updateUser } from '../apis/auth'
+import { toast } from 'react-toastify'
+import { setUserNameAndBio } from '../redux/activeUserSlice'
+function Profile(props) {
+  const dispatch = useDispatch()
+  const { showProfile } = useSelector((state) => state.profile)
+  const activeUser = useSelector((state) => state.activeUser)
+  const [formData, setFormData] = useState({
+    name: activeUser.name,
+    bio: activeUser.bio
+  })
+  const logoutUser = () => {
+    toast.success("Logout Successfull!")
+    localStorage.removeItem("userToken")
+    window.location.href = "/login"
+  }
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+  const submit = async () => {
+
+    dispatch(setUserNameAndBio(formData))
+    toast.success("Updated!")
+    await updateUser(activeUser.id, formData)
+
+  }
+
+  return (
+
+    <div style={{ transition: showProfile ? "0.3s ease-in-out" : "" }} className={props.className}>
+      <div className='absolute  w-[100%]'>
+        <div className='bg-[#166e48] pt-12 pb-3'>
+          <button onClick={() => dispatch(setShowProfile(false))} className='flex items-center'>
+            <IoArrowBack style={{ color: "#fff", width: "30px", height: "20px" }} />
+            <h6 className='text-[16px] text-[#fff] font-semibold'>Profile</h6>
+          </button>
+        </div>
+        <div className=' pt-5'>
+          <div className='flex items-center flex-col'>
+            <img className='w-[150px] h-[150px] rounded-[100%] -ml-5' src={activeUser?.profilePic} alt="" />
+          </div>
+          <InputEdit type="name" handleChange={handleChange} input={formData.name} handleSubmit={submit} />
+
+          <div>
+
+            <div className='py-5 px-4'>
+              <p className='text-[10px] tracking-wide text-[#3b4a54] '>
+                This is not your username or pin. This name will be visible to your contacts
+              </p>
+            </div>
+
+          </div>
+          <InputEdit type="bio" handleChange={handleChange} input={formData.bio} handleSubmit={submit} />
+        </div>
+
+        <div onClick={logoutUser} className='flex items-center justify-center mt-5 cursor-pointer shadow-2xl'>
+          <IoMdLogOut className='text-[#e44d4d] w-[27px] h-[23px]' />
+          <h6 className='text-[17px] text-[#e44d4d] font-semibold'>Logout</h6>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default Profile 
+ 
+===== File: clients\src\components\Start.jsx ===== 
+import React, { useEffect } from 'react'
+import { validUser } from '../apis/auth'
+import { useNavigate } from "react-router-dom"
+function Start() {
+  const pageRoute = useNavigate()
+  useEffect(() => {
+    const isValid = async () => {
+      const data = await validUser()
+      if (!data?.user) {
+        pageRoute("/login")
+      }
+      else {
+        pageRoute("/chats")
+
+      }
+    }
+    isValid()
+
+  }, [pageRoute])
+  return (
+
+
+    <div className='bg-[#fff] flex items-center justify-center w-[100vw] h-[100vh] flex items-center flex-col -gap-y-10'>
+      <lottie-player src="https://assets1.lottiefiles.com/private_files/lf30_kanwuonz.json" background="transparent" speed="1" style={{ width: "300px", height: "260px" }} loop autoplay></lottie-player>
+      <h3 className='font-semibold text-[13px] tracking-wider relative -top-16'>Please Wait. It Might take some time</h3>
+    </div>
+
+  )
+}
+
+export default Start 
+ 
+===== File: clients\src\group\Search.jsx (Not Found
+===== File: clients\src\profile\InputEdit.jsx (Not Found
+===== File: clients\src\ui\Loading.jsx (Not Found
+===== File: clients\src\ui\NoContacts.jsx (Not Found
+===== File: clients\src\ui\SkeletonLoading.jsx (Not Found
+===== File: clients\src\ui\Typing.jsx (Not Found
+===== File: clients\src\index.css ===== 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+ 
+===== File: clients\src\index.js ===== 
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+import './index.css';
+import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux';
+import store from './store';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+      <ToastContainer position="top-right" />
+    </Provider>
+  </React.StrictMode>
+);
+
+// If you want to start measuring performance in your app, pass a function
+// to log results (for example: reportWebVitals(console.log))
+// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
+reportWebVitals();
+ 
+ 
+===== File: clients\src\pages\Chat.jsx ===== 
+import React, { useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import Model from '../components/Model';
+import { BsEmojiSmile, BsFillEmojiSmileFill } from "react-icons/bs"
+import { fetchMessages, sendMessage } from '../apis/messages';
+import { useEffect } from 'react';
+import MessageHistory from '../components/MessageHistory';
+import io from "socket.io-client"
+import "./home.css"
+import { fetchChats, setNotifications } from '../redux/chatsSlice';
+import Loading from '../components/ui/Loading';
+import data from '@emoji-mart/data'
+import Picker from '@emoji-mart/react'
+import { getChatName } from '../utils/logics';
+import Typing from '../components/ui/Typing';
+import { validUser } from '../apis/auth';
+const ENDPOINT = process.env.REACT_APP_SERVER_URL
+let socket, selectedChatCompare;
+
+function Chat(props) {
+  const { activeChat, notifications } = useSelector((state) => state.chats)
+  const dispatch = useDispatch()
+  const [message, setMessage] = useState("")
+  const [messages, setMessages] = useState([])
+  const [socketConnected, setSocketConnected] = useState(false)
+  const [typing, setTyping] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [showPicker, setShowPicker] = useState(false);
+  const activeUser = useSelector((state) => state.activeUser)
+
+  const keyDownFunction = async (e) => {
+    if ((e.key === "Enter" || e.type === "click") && (message)) {
+      setMessage("")
+      socket.emit("stop typing", activeChat._id)
+      const data = await sendMessage({ chatId: activeChat._id, message })
+      socket.emit("new message", data)
+      setMessages([...messages, data])
+      dispatch(fetchChats())
+    }
+  }
+
+
+  useEffect(() => {
+    socket = io(ENDPOINT)
+    socket.on("typing", () => setIsTyping(true))
+    socket.on("stop typing", () => setIsTyping(false))
+  }, [])
+
+  useEffect(() => {
+    socket.emit("setup", activeUser)
+    socket.on("connected", () => {
+      setSocketConnected(true)
+    })
+  }, [messages, activeUser])
+  useEffect(() => {
+    const fetchMessagesFunc = async () => {
+      if (activeChat) {
+        setLoading(true)
+        const data = await fetchMessages(activeChat._id)
+        setMessages(data)
+        socket.emit("join room", activeChat._id)
+        setLoading(false)
+
+      }
+      return
+    }
+    fetchMessagesFunc()
+    selectedChatCompare = activeChat
+
+  }, [activeChat])
+  useEffect(() => {
+    socket.on("message recieved", (newMessageRecieved) => {
+      if ((!selectedChatCompare || selectedChatCompare._id) !== newMessageRecieved.chatId._id) {
+        if (!notifications.includes(newMessageRecieved)) {
+          dispatch(setNotifications([newMessageRecieved, ...notifications]))
+        }
+      }
+      else {
+        setMessages([...messages, newMessageRecieved])
+      }
+      dispatch(fetchChats())
+    })
+  })
+  useEffect(() => {
+    const isValid = async () => {
+      const data = await validUser()
+      if (!data?.user) {
+        window.location.href = "/login"
+      }
+
+    }
+    isValid()
+  }, [])
+  if (loading) {
+    return <div className={props.className}>
+      <Loading />
+    </div>
+  }
+  return (
+    <>
+      {
+        activeChat ?
+          <div className={props.className}>
+            <div className='flex justify-between items-center px-5 bg-[#ffff] w-[100%]'>
+              <div className='flex items-center gap-x-[10px]'>
+                <div className='flex flex-col items-start justify-center'>
+                  <h5 className='text-[17px] text-[#2b2e33] font-bold tracking-wide'>{getChatName(activeChat, activeUser)}</h5>
+                  {/* <p className='text-[11px] text-[#aabac8]'>Last seen 5 min ago</p> */}
+                </div>
+              </div>
+              <div>
+                <Model />
+              </div>
+            </div>
+            <div className='scrollbar-hide w-[100%] h-[70vh] md:h-[66vh] lg:h-[69vh] flex flex-col overflow-y-scroll p-4'>
+              <MessageHistory typing={isTyping} messages={messages} />
+              <div className='ml-7 -mb-10'>
+                {
+                  isTyping ?
+                    <Typing width="100" height="100" /> : ""
+                }
+
+              </div>
+            </div>
+            <div className='absolute left-[31%] bottom-[8%]'>
+              {
+                showPicker && <Picker data={data} onEmojiSelect={(e) => setMessage(message + e.native)} />
+              }
+              <div className='border-[1px] border-[#aabac8] px-6 py-3 w-[360px] sm:w-[400px] md:w-[350px] h-[50px] lg:w-[400px] rounded-t-[10px]'>
+
+                <form onKeyDown={(e) => keyDownFunction(e)} onSubmit={(e) => e.preventDefault()}>
+                  <input onChange={(e) => {
+                    setMessage(e.target.value)
+                    if (!socketConnected) return
+                    if (!typing) {
+                      setTyping(true)
+                      socket.emit('typing', activeChat._id)
+                    }
+                    let lastTime = new Date().getTime()
+                    var time = 3000
+                    setTimeout(() => {
+                      var timeNow = new Date().getTime()
+                      var timeDiff = timeNow - lastTime
+                      if (timeDiff >= time && typing) {
+                        socket.emit("stop typing", activeChat._id)
+                        setTyping(false)
+                      }
+                    }, time)
+                  }} className='focus:outline-0 w-[100%] bg-[#f8f9fa]' type="text" name="message" placeholder="Enter message" value={message} />
+                </form>
+
+              </div>
+
+              <div className='border-x-[1px] border-b-[1px] bg-[#f8f9fa] border-[#aabac8] px-6 py-3 w-[360px] sm:w-[400px] md:w-[350px] lg:w-[400px] rounded-b-[10px] h-[50px]'>
+                {/* {
+                  isTyping ? <div>Loading</div> : ""
+                } */}
+                <div className='flex justify-between items-start'>
+
+                  <div className='cursor-pointer' onClick={() => setShowPicker(!showPicker)}>
+
+                    {showPicker ? <BsFillEmojiSmileFill className='w-[20px] h-[20px] text-[#ffb02e] border-[black]' /> : <BsEmojiSmile className='w-[20px] h-[20px]' />}
+                  </div>
+                  <button onClick={(e) => keyDownFunction(e)} className='bg-[#f8f9fa] border-[2px] border-[#d4d4d4] text-[14px] px-2 py-[3px] text-[#9e9e9e] font-medium rounded-[7px] -mt-1'>Send</button>
+                </div>
+              </div>
+            </div>
+          </div> :
+          <div className={props.className}>
+            <div className='relative'>
+              <div className='absolute top-[40vh] left-[44%] flex flex-col items-center justify-center gap-y-3'>
+                <img className='w-[50px] h-[50px] rounded-[25px]' alt="User profile" src={activeUser.profilePic} />
+                <h3 className='text-[#111b21] text-[20px] font-medium tracking-wider'>Welcome <span className='text-[#166e48] text-[19px] font-bold'> {activeUser.name}</span></h3>
+              </div>
+            </div>
+          </div>
+
+      }
+    </>
+  )
+}
+
+export default Chat 
+ 
+===== File: clients\src\pages\Home.jsx ===== 
+import React, { useState } from 'react'
+import { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { searchUsers, validUser } from '../apis/auth'
+import { setActiveUser } from '../redux/activeUserSlice'
+import { RiNotificationBadgeFill } from "react-icons/ri"
+import { BsSearch } from "react-icons/bs"
+import { BiNotification } from "react-icons/bi"
+import { IoIosArrowDown } from "react-icons/io"
+import { setShowNotifications, setShowProfile } from '../redux/profileSlice'
+import Chat from './Chat'
+import Profile from "../components/Profile"
+import { acessCreate } from "../apis/chat.js"
+import "./home.css"
+import { fetchChats, setNotifications } from '../redux/chatsSlice'
+import { getSender } from '../utils/logics'
+import { setActiveChat } from '../redux/chatsSlice'
+import Group from '../components/Group'
+import Contacts from '../components/Contacts'
+import { Effect } from "react-notification-badge"
+// import NotificationBadge from 'react-notification-badge/lib/components/NotificationBadge';
+import NotificationBadge from 'react-notification-badge';
+import Search from '../components/group/Search'
+function Home() {
+  const dispatch = useDispatch()
+  const { showProfile, showNotifications } = useSelector((state) => state.profile)
+  const { notifications } = useSelector((state) => state.chats)
+  const { activeUser } = useSelector((state) => state)
+  const [searchResults, setSearchResults] = useState([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [search, setSearch] = useState("")
+
+  const handleSearch = async (e) => {
+    setSearch(e.target.value)
+  }
+  const handleClick = async (e) => {
+    await acessCreate({ userId: e._id })
+    dispatch(fetchChats())
+    setSearch("")
+  }
+  useEffect(() => {
+    const searchChange = async () => {
+      setIsLoading(true)
+      const { data } = await searchUsers(search)
+      setSearchResults(data)
+      setIsLoading(false)
+    }
+    searchChange()
+  }, [search])
+  useEffect(() => {
+    const isValid = async () => {
+      const data = await validUser()
+
+      const user = {
+        id: data?.user?._id,
+        email: data?.user?.email,
+        profilePic: data?.user?.profilePic,
+        bio: data?.user?.bio,
+        name: data?.user?.name
+      }
+      dispatch(setActiveUser(user))
+    }
+    isValid()
+
+  }, [dispatch, activeUser])
+
+
+  return (
+    <>
+
+      <div className="bg-[#282C35!] scrollbar-hide z-10 h-[100vh]  lg:w-[90%] lg:mx-auto overflow-y-hidden shadow-2xl">
+
+        <div className='flex'>
+          {
+            !showProfile ?
+              <div className="md:flex md:flex-col min-w-[360px] h-[100vh] md:h-[98.6vh] bg-[#ffff] relative">
+
+                <div className='h-[61px] px-4'>
+                  <div className='flex'>
+                    <a className='flex items-center relative  -top-4 block h-[90px]' href='/'>
+
+                      <h3 className='text-[20px] text-[#1f2228] font-body font-extrabold tracking-wider'>Messages</h3>
+                    </a>
+                  </div>
+                  <div className='absolute top-4 right-5 flex items-center gap-x-3'>
+                    <button onClick={() => dispatch(setShowNotifications(!showNotifications))}>
+                      <NotificationBadge
+                        count={notifications.length}
+                        effect={Effect.SCALE}
+                        style={{ width: "15px", height: "15px", fontSize: "9px", padding: "4px 2px 2px 2px" }}
+                      />
+                      {
+                        showNotifications ? <RiNotificationBadgeFill style={{ width: "25px", height: "25px", color: "#319268" }} /> : <BiNotification style={{ color: "#319268", width: "25px", height: "25px" }} />
+                      }
+
+                    </button>
+                    <div className={`${showNotifications ? "overflow-y-scroll scrollbar-hide tracking-wide absolute top-10 -left-32 z-10 w-[240px] bg-[#fafafa] px-4 py-2 shadow-2xl" : "hidden"}`}>
+                      <div className='text-[13px]'>
+
+                        {!notifications.length && "No new messages"}
+                      </div>
+                      {
+                        notifications.map((e, index) => {
+                          return (
+                            <div onClick={() => {
+                              dispatch(setActiveChat(e.chatId))
+                              dispatch(setNotifications(notifications.filter((data) => data !== e)))
+
+                            }} key={index} className='text-[12.5px] text-black px-2 cursor-pointer' >
+
+                              {e.chatId.isGroup ? `New Message in ${e.chatId.chatName}` : `New Message from ${getSender(activeUser, e.chatId.users)}`}
+                            </div>
+
+                          )
+
+                        })
+                      }
+                    </div>
+                    <button onClick={() => dispatch(setShowProfile(true))} className='flex items-center gap-x-1 relative'>
+                      <img className='w-[28px] h-[28px] rounded-[25px]' src={activeUser?.profilePic} alt="" />
+                      <IoIosArrowDown style={{ color: "#616c76", height: "14px", width: "14px" }} />
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+
+                  <div className='-mt-6 relative pt-6 px-4'>
+                    <form onSubmit={(e) => e.preventDefault()}>
+
+                      <input onChange={handleSearch} className='w-[99.5%] bg-[#f6f6f6] text-[#111b21] tracking-wider pl-9 py-[8px] rounded-[9px] outline-0' type="text" name="search" placeholder="Search" />
+
+                    </form>
+
+                    <div className='absolute top-[36px] left-[27px]'>
+                      <BsSearch style={{ color: "#c4c4c5" }} />
+                    </div>
+                    <Group />
+
+                    <div style={{ display: search ? "" : "none" }} className='h-[100vh] absolute z-10 w-[100%] left-[0px] top-[70px] bg-[#fff] flex flex-col gap-y-3 pt-3 px-4'>
+                      <Search searchResults={searchResults} isLoading={isLoading} handleClick={handleClick} search={search} />
+
+                    </div>
+                  </div>
+
+
+                  <Contacts />
+
+
+                </div>
+
+
+              </div> : <Profile className="min-w-[100%] sm:min-w-[360px] h-[100vh] bg-[#fafafa] shodow-xl relative" />
+          }
+          <Chat className="chat-page relative lg:w-[100%] h-[100vh] bg-[#fafafa]" />
+
+
+
+
+        </div>
+      </div >
+
+    </>
+  )
+}
+
+export default Home 
+ 
+===== File: clients\src\pages\Login.jsx ===== 
+import React from 'react'
+import { useEffect } from 'react'
+import { GoogleLogin } from "react-google-login"
+import { gapi } from "gapi-script"
+import { googleAuth } from '../apis/auth'
+import { useState } from 'react'
+import { loginUser } from '../apis/auth'
+import { Link, useNavigate } from 'react-router-dom'
+import { BsEmojiLaughing, BsEmojiExpressionless } from "react-icons/bs"
+import { toast } from 'react-toastify';
+import { validUser } from '../apis/auth'
+const defaultData = {
+  email: "",
+  password: ""
+}
+function Login() {
+  const [formData, setFormData] = useState(defaultData)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const pageRoute = useNavigate()
+  const googleSuccess = async (res) => {
+    if (res?.profileObj) {
+      console.log(res.profileObj)
+      setIsLoading(true)
+      const response = await googleAuth({ tokenId: res.tokenId })
+      setIsLoading(false)
+
+      console.log("response :" + res)
+      if (response.data.token) {
+        localStorage.setItem("userToken", response.data.token)
+        pageRoute("/chats")
+
+      }
+    }
+  }
+  const googleFailure = (error) => {
+    // toast.error("Something went Wrong.Try Again!")
+  }
+  const handleOnChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+
+  const formSubmit = async (e) => {
+    e.preventDefault()
+    if (formData.email.includes("@") && formData.password.length > 6) {
+      setIsLoading(true)
+      const { data } = await loginUser(formData)
+      if (data?.token) {
+        localStorage.setItem("userToken", data.token)
+        toast.success("Succesfully Login!")
+        setIsLoading(false)
+        pageRoute("/chats")
+      }
+      else {
+        setIsLoading(false)
+        toast.error("Invalid Credentials!")
+        setFormData({ ...formData, password: "" })
+      }
+    }
+    else {
+      setIsLoading(false)
+      toast.warning("Provide valid Credentials!")
+      setFormData(defaultData)
+
+    }
+  }
+  useEffect(() => {
+    const initClient = () => {
+      gapi.client.init({
+        clientId: process.env.REACT_APP_CLIENT_ID,
+        scope: ''
+      });
+    };
+    gapi.load('client:auth2', initClient);
+    const isValid = async () => {
+      const data = await validUser()
+      if (data?.user) {
+        window.location.href = "/chats"
+      }
+
+    }
+    isValid()
+  }, [])
+  return (
+    <>
+
+      <div className='bg-[#121418] w-[100vw] h-[100vh] flex justify-center items-center'>
+        <div className='w-[90%] sm:w-[400px] pl-0 ml-0 h-[400px] sm:pl-0 sm:ml-9 mt-20 relative'>
+          {/* <img className='w-[100px] absolute -top-16 left-28' src="https://mir-s3-cdn-cf.behance.net/project_modules/fs/78c4af118001599.608076cf95739.jpg" alt="" /> */}
+          <div className='absolute -top-5 left-0'>
+            <h3 className=' text-[25px] font-bold tracking-wider text-[#fff]'>Login</h3>
+            <p className='text-[#fff] text-[12px] tracking-wider font-medium'>No Account ? <Link className='text-[rgba(0,195,154,1)] underline' to="/register">Sign up</Link></p>
+          </div>
+          {/* <h2 className='text-2xl text-[#fff] font-bold tracking-wide my-6 text-center'>Login to your Account</h2> */}
+          <form className='flex flex-col gap-y-3 mt-[12%]' onSubmit={formSubmit}>
+            <div>
+              <input className="w-[100%] sm:w-[80%] bg-[#222222] h-[50px] pl-3 text-[#ffff]" onChange={handleOnChange} name="email" type="text" placeholder='Email' value={formData.email} required />
+
+            </div>
+            <div className='relative'>
+
+              <input className='w-[100%] sm:w-[80%] bg-[#222222] h-[50px] pl-3 text-[#ffff]' onChange={handleOnChange} type={showPass ? "text" : "password"} name="password" placeholder='Password' value={formData.password} required />
+              {
+                !showPass ? <button type='button'><BsEmojiLaughing onClick={() => setShowPass(!showPass)} className='text-[#fff] absolute top-3 right-5 sm:right-24 w-[30px] h-[25px]' /></button> : <button type='button'> <BsEmojiExpressionless onClick={() => setShowPass(!showPass)} className='text-[#fff] absolute top-3 right-5 sm:right-24 w-[30px] h-[25px]' /></button>
+              }
+            </div>
+
+            <button style={{ background: "linear-gradient(90deg, rgba(0,195,154,1) 0%, rgba(224,205,115,1) 100%)" }} className='w-[100%]  sm:w-[80%] h-[50px] font-bold text-[#121418] tracking-wide text-[17px] relative' type='submit'>
+              <div style={{ display: isLoading ? "" : "none" }} className='absolute -top-[53px] left-[27%] sm:-top-[53px] sm:left-[56px]'>
+
+                <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_h9kds1my.json" background="transparent" speed="1" style={{ width: "200px", height: "160px" }} loop autoplay></lottie-player>
+              </div>
+              <p style={{ display: isLoading ? "none" : "block" }} className='test-[#fff]'>Login</p>
+            </button>
+            {/* <div className='border-t-[1px] w-[100%] sm:w-[80%] my-3' ></div> */}
+            <p className='text-[#fff] text-center sm:-ml-20'>/</p>
+            <GoogleLogin
+              clientId={process.env.REACT_APP_CLIENT_ID}
+              render={(renderProps) => (
+                <button style={{ borderImage: "linear-gradient(to right, rgba(0,195,154,1) 50%, rgba(224,205,115,1) 80%)", borderImageSlice: "1" }} onClick={renderProps.onClick} disabled={renderProps.disabled} aria-label="Continue with google" className="focus:ring-2 focus:ring-offset-1  py-3.5 px-4 border rounded-lg  flex items-center w-[100%]  sm:w-[80%]" disableElevation={true} disablefocusRipple={true}>
+                  <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/sign_in-svg2.svg" alt="google" />
+                  <p className="text-[base] font-medium ml-4 text-[#fff]">Continue with Google</p>
+                </button>
+              )}
+              onSuccess={googleSuccess}
+              onFailure={googleFailure}
+              cookiePolicy={'single_host_origin'}
+              scope="profile email https://www.googleapis.com/auth/user.birthday.read"
+            />
+
+
+          </form>
+        </div>
+
+      </div>
+    </>
+  )
+}
+
+export default Login 
+ 
+===== File: clients\src\pages\Regsiter.jsx ===== 
+import React from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { GoogleLogin } from "react-google-login"
+import { gapi } from "gapi-script"
+import { useEffect } from 'react'
+import { googleAuth, registerUser } from '../apis/auth'
+import { useState } from 'react'
+import { BsEmojiLaughing, BsEmojiExpressionless } from "react-icons/bs"
+import { toast } from 'react-toastify';
+import { validUser } from '../apis/auth'
+const defaultData = {
+  firstname: "",
+  lastname: "",
+  email: "",
+  password: ""
+}
+function Regsiter() {
+  const [formData, setFormData] = useState(defaultData)
+  const [isLoading, setIsLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
+  const pageRoute = useNavigate()
+  const handleOnChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+  }
+  const handleOnSubmit = async (e) => {
+    e.preventDefault()
+    setIsLoading(true)
+    if (formData.email.includes("@") && formData.password.length > 6) {
+      const { data } = await registerUser(formData)
+      if (data?.token) {
+        localStorage.setItem("userToken", data.token)
+        toast.success("Succesfully Registered😍")
+        setIsLoading(false)
+        pageRoute("/chats")
+
+      }
+      else {
+        setIsLoading(false)
+        toast.error("Invalid Credentials!")
+      }
+    }
+    else {
+      setIsLoading(false)
+      toast.warning("Provide valid Credentials!")
+      setFormData({ ...formData, password: "" })
+    }
+
+  }
+
+  const googleSuccess = async (res) => {
+    if (res?.profileObj) {
+      setIsLoading(true)
+      const response = await googleAuth({ tokenId: res.tokenId })
+      setIsLoading(false)
+      if (response.data.token) {
+        localStorage.setItem("userToken", response.data.token)
+        pageRoute("/chats")
+      }
+    }
+  }
+  const googleFailure = (error) => {
+    toast.error("Something Went Wrong.Try Agian!")
+  }
+
+  useEffect(() => {
+    const initClient = () => {
+      gapi.client.init({
+        clientId: process.env.REACT_APP_CLIENT_ID,
+        scope: ''
+      });
+    };
+    gapi.load('client:auth2', initClient);
+    const isValid = async () => {
+      const data = await validUser()
+      if (data?.user) {
+        window.location.href = "/chats"
+      }
+    }
+    isValid()
+  }, [])
+  return (
+    <div className='bg-[#121418] w-[100vw] h-[100vh] flex justify-center items-center'>
+      <div className='w-[90%] sm:w-[400px] pl-0 ml-0 h-[400px] sm:pl-0 sm:ml-9 mt-10 relative'>
+        <div className='absolute -top-7 left-0'>
+          <h3 className=' text-[25px] font-bold tracking-wider text-[#fff]'>Register</h3>
+          <p className='text-[#fff] text-[12px] tracking-wider font-medium'>Have Account ? <Link className='text-[rgba(0,195,154,1)] underline' to="/login">Sign in</Link></p>
+        </div>
+        <form className='flex flex-col gap-y-3 mt-[12%]' onSubmit={handleOnSubmit}>
+          <div className='flex gap-x-2 w-[100%]'>
+            <input onChange={handleOnChange} className='bg-[#222222] h-[50px] pl-3 text-[#ffff] w-[49%] sm:w-[47%]' type="text" name="firstname" placeholder='First Name' value={formData.firstname} required />
+            <input onChange={handleOnChange} className='bg-[#222222] h-[50px] pl-3 text-[#ffff] w-[49%] sm:w-[47%]' type="text" name="lastname" placeholder='Last Name' value={formData.lastname} required />
+          </div>
+          <div>
+            <input onChange={handleOnChange} className='bg-[#222222] h-[50px] pl-3 text-[#ffff] w-[100%] sm:w-[96.3%]' type="email" name="email" placeholder="Email" value={formData.email} required />
+          </div>
+          <div className='relative flex flex-col gap-y-3'>
+            <input onChange={handleOnChange} className='bg-[#222222] h-[50px] pl-3 text-[#ffff] w-[100%] sm:w-[96.3%]' type={showPass ? "text" : "password"} name="password" placeholder="Password" value={formData.password} required />
+
+
+            {/* <button onCli type="button">
+              <BsEmojiExpressionless className='text-[#fff] absolute top-3 right-6 w-[30px] h-[25px]' />
+            </button> */}
+            {
+              !showPass ? <button type='button'><BsEmojiLaughing onClick={() => setShowPass(!showPass)} className='text-[#fff] absolute top-3 right-4 sm:right-6 w-[30px] h-[25px]' /></button> : <button type='button'> <BsEmojiExpressionless onClick={() => setShowPass(!showPass)} className='text-[#fff] absolute top-3 right-4 sm:right-6 w-[30px] h-[25px]' /></button>
+            }
+
+
+          </div>
+          <button style={{ background: "linear-gradient(90deg, rgba(0,195,154,1) 0%, rgba(224,205,115,1) 100%)" }} className='w-[100%]  sm:w-[96.3%] h-[50px] font-bold text-[#121418] tracking-wide text-[17px] relative' type='submit'>
+            <div style={{ display: isLoading ? "" : "none" }} className='absolute -top-[53px] left-[29.5%] sm:-top-[53px] sm:left-[87px]'>
+
+              <lottie-player src="https://assets2.lottiefiles.com/packages/lf20_h9kds1my.json" background="transparent" speed="1" style={{ width: "200px", height: "160px" }} loop autoplay></lottie-player>
+            </div>
+            <p style={{ display: isLoading ? "none" : "block" }} className='test-[#fff]'>Regsiter</p>
+          </button>
+          <p className='text-[#fff] text-center sm:-ml-8'>/</p>
+          <GoogleLogin
+            clientId={process.env.REACT_APP_CLIENT_ID}
+            render={(renderProps) => (
+              <button style={{ borderImage: "linear-gradient(to right, rgba(0,195,154,1) 50%, rgba(224,205,115,1) 80%)", borderImageSlice: "1" }} onClick={renderProps.onClick} disabled={renderProps.disabled} aria-label="Continue with google" className="focus:ring-2 focus:ring-offset-1   py-3.5 px-4 border rounded-lg  flex items-center w-[100%]  sm:w-[96.3%]" disableElevation={true} disableFocusRipple={true}>
+                <img src="https://tuk-cdn.s3.amazonaws.com/can-uploader/sign_in-svg2.svg" alt="google" />
+                <p className="text-[base] font-medium ml-4 text-[#fff]">Continue with Google</p>
+              </button>
+            )}
+            onSuccess={googleSuccess}
+            onFailure={googleFailure}
+            cookiePolicy={'single_host_origin'}
+          />
+        </form>
+      </div>
+    </div>
+  )
+}
+
+export default Regsiter 
+ 
+===== File: clients\src\home.css (Not Found
+===== File: clients\src\redux\activeUserSlice.js ===== 
+import { createSlice } from '@reduxjs/toolkit';
+
+const initialState = {
+  id: '',
+  email: '',
+  profilePic: '',
+  bio: '',
+  name: '',
+};
+
+const activeUserSlice = createSlice({
+  name: 'activeUser',
+  initialState,
+  reducers: {
+    setActiveUser: (state, { payload }) => {
+      state.id = payload.id;
+      state.email = payload.email;
+      state.profilePic = payload.profilePic;
+      state.bio = payload.bio;
+      state.name = payload.name;
+    },
+    setUserNameAndBio: (state, { payload }) => {
+      state.name = payload.name;
+      state.bio = payload.bio;
+    },
+  },
+});
+export const { setActiveUser, setUserNameAndBio } = activeUserSlice.actions;
+export default activeUserSlice.reducer;
+ 
+ 
+===== File: clients\src\redux\chatsSlice.js ===== 
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
+import { fetchAllChats } from '../apis/chat';
+const initialState = {
+  chats: [],
+  activeChat: '',
+  isLoading: false,
+  notifications: [],
+};
+export const fetchChats = createAsyncThunk('redux/chats', async () => {
+  try {
+    const data = await fetchAllChats();
+    return data;
+  } catch (error) {
+    toast.error('Something Went Wrong!Try Again');
+  }
+});
+const chatsSlice = createSlice({
+  name: 'chats',
+  initialState,
+  reducers: {
+    setActiveChat: (state, { payload }) => {
+      state.activeChat = payload;
+    },
+    setNotifications: (state, { payload }) => {
+      state.notifications = payload;
+    },
+  },
+  extraReducers: {
+    [fetchChats.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [fetchChats.fulfilled]: (state, { payload }) => {
+      state.chats = payload;
+      state.isLoading = false;
+    },
+    [fetchChats.rejected]: (state) => {
+      state.isLoading = false;
+    },
+  },
+});
+export const { setActiveChat, setNotifications } = chatsSlice.actions;
+export default chatsSlice.reducer;
+ 
+ 
+===== File: clients\src\redux\profileSlice.js ===== 
+import { createSlice } from "@reduxjs/toolkit";
+const initialState = {
+  showProfile: false,
+  showNotifications: false,
+};
+const profileSlice = createSlice({
+  name: "profile",
+  initialState,
+  reducers: {
+    setShowProfile: (state, { payload }) => {
+      state.showProfile = payload;
+    },
+    setShowNotifications: (state, { payload }) => {
+      state.showNotifications = payload;
+    },
+  },
+});
+export const { setShowProfile, setShowNotifications } = profileSlice.actions;
+export default profileSlice.reducer;
+ 
+ 
+===== File: clients\src\redux\searchSlice.js ===== 
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
+import { searchUsers } from '../apis/auth';
+const initialState = {
+  searchResults: [],
+  isLoading: false,
+  isError: false,
+};
+export const searchUserThunk = createAsyncThunk(
+  'redux/searchUser',
+  async (search) => {
+    try {
+      const { data } = await searchUsers(search);
+      return data;
+    } catch (error) {
+      toast.error('Something Went Wrong.Try Again!');
+    }
+  }
+);
+const searchSlice = createSlice({
+  name: 'search',
+  initialState,
+  reducers: {},
+  extraReducers: {
+    [searchUserThunk.pending]: (state) => {
+      state.isLoading = true;
+    },
+    [searchUserThunk.fulfilled]: (state, { payload }) => {
+      state.searchResults = payload;
+      state.isLoading = false;
+    },
+    [searchUserThunk.rejected]: (state) => {
+      state.isError = true;
+    },
+  },
+});
+export default searchSlice.reducer;
+ 
+ 
+===== File: clients\src\reportWebVitals.js ===== 
+const reportWebVitals = onPerfEntry => {
+  if (onPerfEntry && onPerfEntry instanceof Function) {
+    import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+      getCLS(onPerfEntry);
+      getFID(onPerfEntry);
+      getFCP(onPerfEntry);
+      getLCP(onPerfEntry);
+      getTTFB(onPerfEntry);
+    });
+  }
+};
+
+export default reportWebVitals;
+ 
+ 
+===== File: clients\src\setupTests.js ===== 
+// jest-dom adds custom jest matchers for asserting on DOM nodes.
+// allows you to do things like:
+// expect(element).toHaveTextContent(/react/i)
+// learn more: https://github.com/testing-library/jest-dom
+import '@testing-library/jest-dom';
+ 
+ 
+===== File: clients\src\store.js ===== 
+import { configureStore } from "@reduxjs/toolkit";
+import activeUserSlice from "./redux/activeUserSlice";
+import chatsSlice from "./redux/chatsSlice";
+import profileSlice from "./redux/profileSlice";
+import searchSlice from "./redux/searchSlice";
+const store = configureStore({
+  reducer: {
+    activeUser: activeUserSlice,
+    profile: profileSlice,
+    search: searchSlice,
+    chats: chatsSlice,
+  },
+});
+export default store;
+ 
+ 
+===== File: clients\src\utils\apiBaseUrl.js ===== 
+const SERVER_URL =
+  window.location.hostname === 'localhost'
+    ? 'http://localhost:8000'
+    : 'http://192.168.231.168:8000';
+
+export default SERVER_URL;
+ 
+ 
+===== File: clients\src\utils\logics.js ===== 
+export const isSameSenderMargin = (messages, m, i, userId) => {
+  if (
+    i < messages.length - 1 &&
+    messages[i + 1].sender._id === m.sender._id &&
+    messages[i].sender._id !== userId
+  )
+    return 33;
+  else if (
+    (i < messages.length - 1 &&
+      messages[i + 1].sender._id !== m.sender._id &&
+      messages[i].sender._id !== userId) ||
+    (i === messages.length - 1 && messages[i].sender._id !== userId)
+  )
+    return 0;
+  else return 'auto';
+};
+export function timeSince(date) {
+  var seconds = Math.floor((new Date() - date) / 1000);
+
+  var interval = seconds / 31536000;
+
+  if (interval > 1) {
+    return Math.floor(interval) + ' year ago';
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    return Math.floor(interval) + ' month ago';
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    return Math.floor(interval) + ' day ago';
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    return Math.floor(interval) + ' hour ago';
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    return Math.floor(interval) + ' minute ago';
+  }
+  return Math.floor(seconds) + ' seconda ago';
+}
+export const isSameSender = (messages, m, i, userId) => {
+  return (
+    i < messages.length - 1 &&
+    (messages[i + 1].sender._id !== m.sender._id ||
+      messages[i + 1].sender._id === undefined) &&
+    messages[i].sender._id !== userId
+  );
+};
+export const isLastMessage = (messages, i, userId) => {
+  return (
+    i === messages.length - 1 &&
+    messages[messages.length - 1].sender._id !== userId &&
+    messages[messages.length - 1].sender._id
+  );
+};
+export const isSameUser = (messages, m, i) => {
+  return i > 0 && messages[i - 1].sender._id === m.sender._id;
+};
+export const getSender = (activeUser, users) => {
+  return activeUser.id === users[0]._id ? users[1].name : users[0].name;
+};
+export const getChatName = (activeChat, activeUser) => {
+  return activeChat?.isGroup
+    ? activeChat?.chatName
+    : activeChat?.users[0]?._id === activeUser.id
+    ? activeChat?.users[1]?.name
+    : activeChat?.users[0]?.name;
+};
+export const getChatPhoto = (activeChat, activeUser) => {
+  return activeChat?.isGroup
+    ? activeChat.photo
+    : activeChat?.users[0]?._id === activeUser?.id
+    ? activeChat?.users[1]?.profilePic
+    : activeChat?.users[0]?.profilePic;
+};
+ 
+ 
+===== File: clients\src\tailwind.config.js (Not Found
+===== File: server\.env ===== 
+PORT=8000
+URL=mongodb://127.0.0.1:27017/akshat-hypermode
+SECRET=3e9205abd1c1cb4826ecf4b45d20684afa7ef1175e6ffd1f9ee75097c71f99ba
+CLIENT_ID=220287336327-lqecirr1ui4sm6ave7n44fh42ag3usub.apps.googleusercontent.com
+BASE_URL=http://localhost:3000,http://192.168.231.168
+FLASK_SERVER_URL=http://localhost:5000
+
+
+ 
+ 
+===== File: server\.gitignore ===== 
+/node_modules
+/.env 
+ 
+===== File: server\controllers\chatControllers.js ===== 
+import Chat from '../models/chatModel.js';
+import user from '../models/userModel.js';
+
+export const accessChats = async (req, res) => {
+  const { userId } = req.body;
+  if (!userId) res.send({ message: "Provide User's Id" });
+  let chatExists = await Chat.find({
+    isGroup: false,
+    $and: [
+      { users: { $elemMatch: { $eq: userId } } },
+      { users: { $elemMatch: { $eq: req.rootUserId } } },
+    ],
+  })
+    .populate('users', '-password')
+    .populate('latestMessage');
+  chatExists = await user.populate(chatExists, {
+    path: 'latestMessage.sender',
+    select: 'name email profilePic',
+  });
+  if (chatExists.length > 0) {
+    res.status(200).send(chatExists[0]);
+  } else {
+    let data = {
+      chatName: 'sender',
+      users: [userId, req.rootUserId],
+      isGroup: false,
+    };
+    try {
+      const newChat = await Chat.create(data);
+      const chat = await Chat.find({ _id: newChat._id }).populate(
+        'users',
+        '-password'
+      );
+      res.status(200).json(chat);
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+};
+export const fetchAllChats = async (req, res) => {
+  try {
+    const chats = await Chat.find({
+      users: { $elemMatch: { $eq: req.rootUserId } },
+    })
+      .populate('users')
+      .populate('latestMessage')
+      .populate('groupAdmin')
+      .sort({ updatedAt: -1 });
+    const finalChats = await user.populate(chats, {
+      path: 'latestMessage.sender',
+      select: 'name email profilePic',
+    });
+    res.status(200).json(finalChats);
+  } catch (error) {
+    res.status(500).send(error);
+    console.log(error);
+  }
+};
+export const creatGroup = async (req, res) => {
+  const { chatName, users } = req.body;
+  if (!chatName || !users) {
+    res.status(400).json({ message: 'Please fill the fields' });
+  }
+  const parsedUsers = JSON.parse(users);
+  if (parsedUsers.length < 2)
+    res.send(400).send('Group should contain more than 2 users');
+  parsedUsers.push(req.rootUser);
+  try {
+    const chat = await Chat.create({
+      chatName: chatName,
+      users: parsedUsers,
+      isGroup: true,
+      groupAdmin: req.rootUserId,
+    });
+    const createdChat = await Chat.findOne({ _id: chat._id })
+      .populate('users', '-password')
+      .populate('groupAdmin', '-password');
+    // res.status(200).json(createdChat);
+    res.send(createdChat);
+  } catch (error) {
+    res.sendStatus(500);
+  }
+};
+export const renameGroup = async (req, res) => {
+  const { chatId, chatName } = req.body;
+  if (!chatId || !chatName)
+    res.status(400).send('Provide Chat id and Chat name');
+  try {
+    const chat = await Chat.findByIdAndUpdate(chatId, {
+      $set: { chatName },
+    })
+      .populate('users', '-password')
+      .populate('groupAdmin', '-password');
+    if (!chat) res.status(404);
+    res.status(200).send(chat);
+  } catch (error) {
+    res.status(500).send(error);
+    console.log(error);
+  }
+};
+export const addToGroup = async (req, res) => {
+  const { userId, chatId } = req.body;
+  const existing = await Chat.findOne({ _id: chatId });
+  if (!existing.users.includes(userId)) {
+    const chat = await Chat.findByIdAndUpdate(chatId, {
+      $push: { users: userId },
+    })
+      .populate('groupAdmin', '-password')
+      .populate('users', '-password');
+    if (!chat) res.status(404);
+    res.status(200).send(chat);
+  } else {
+    res.status(409).send('user already exists');
+  }
+};
+export const removeFromGroup = async (req, res) => {
+  const { userId, chatId } = req.body;
+  const existing = await Chat.findOne({ _id: chatId });
+  if (existing.users.includes(userId)) {
+    Chat.findByIdAndUpdate(chatId, {
+      $pull: { users: userId },
+    })
+      .populate('groupAdmin', '-password')
+      .populate('users', '-password')
+      .then((e) => res.status(200).send(e))
+      .catch((e) => res.status(404));
+  } else {
+    res.status(409).send('user doesnt exists');
+  }
+};
+export const removeContact = async (req, res) => {};
+ 
+ 
+===== File: server\controllers\messageControllers.js ===== 
+import Message from '../models/messageModel.js';
+import user from '../models/userModel.js';
+import Chat from '../models/chatModel.js';
+export const sendMessage = async (req, res) => {
+  const { chatId, message } = req.body;
+  try {
+    let msg = await Message.create({ sender: req.rootUserId, message, chatId });
+    msg = await (
+      await msg.populate('sender', 'name profilePic email')
+    ).populate({
+      path: 'chatId',
+      select: 'chatName isGroup users',
+      model: 'Chat',
+      populate: {
+        path: 'users',
+        select: 'name email profilePic',
+        model: 'User',
+      },
+    });
+    await Chat.findByIdAndUpdate(chatId, {
+      latestMessage: msg,
+    });
+    res.status(200).send(msg);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error });
+  }
+};
+export const getMessages = async (req, res) => {
+  const { chatId } = req.params;
+  try {
+    let messages = await Message.find({ chatId })
+      .populate({
+        path: 'sender',
+        model: 'User',
+        select: 'name profilePic email',
+      })
+      .populate({
+        path: 'chatId',
+        model: 'Chat',
+      });
+
+    res.status(200).json(messages);
+  } catch (error) {
+    res.sendStatus(500).json({ error: error });
+    console.log(error);
+  }
+};
+ 
+ 
+===== File: server\controllers\user.js ===== 
+import user from '../models/userModel.js';
+import bcrypt from 'bcryptjs';
+import { OAuth2Client } from 'google-auth-library';
+export const register = async (req, res) => {
+  const { firstname, lastname, email, password } = req.body;
+  try {
+    const existingUser = await user.findOne({ email });
+    if (existingUser)
+      return res.status(400).json({ error: 'User already Exits' });
+    const fullname = firstname + ' ' + lastname;
+    const newuser = new user({ email, password, name: fullname });
+    const token = await newuser.generateAuthToken();
+    await newuser.save();
+    res.json({ message: 'success', token: token });
+  } catch (error) {
+    console.log('Error in register ' + error);
+    res.status(500).send(error);
+  }
+};
+export const login = async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const valid = await user.findOne({ email });
+    if (!valid) res.status(200).json({ message: 'User dont exist' });
+    const validPassword = await bcrypt.compare(password, valid.password);
+    if (!validPassword) {
+      res.status(200).json({ message: 'Invalid Credentials' });
+    } else {
+      const token = await valid.generateAuthToken();
+      await valid.save();
+      res.cookie('userToken', token, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      res.status(200).json({ token: token, status: 200 });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+export const validUser = async (req, res) => {
+  try {
+    const validuser = await user
+      .findOne({ _id: req.rootUserId })
+      .select('-password');
+    if (!validuser) res.json({ message: 'user is not valid' });
+    res.status(201).json({
+      user: validuser,
+      token: req.token,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error });
+    console.log(error);
+  }
+};
+export const googleAuth = async (req, res) => {
+  try {
+    const { tokenId } = req.body;
+    const client = new OAuth2Client(process.env.CLIENT_ID);
+    const verify = await client.verifyIdToken({
+      idToken: tokenId,
+      audience: process.env.CLIENT_ID,
+    });
+    const { email_verified, email, name, picture } = verify.payload;
+    if (!email_verified) res.json({ message: 'Email Not Verified' });
+    const userExist = await user.findOne({ email }).select('-password');
+    if (userExist) {
+      res.cookie('userToken', tokenId, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      res.status(200).json({ token: tokenId, user: userExist });
+    } else {
+      const password = email + process.env.CLIENT_ID;
+      const newUser = await user({
+        name: name,
+        profilePic: picture,
+        password,
+        email,
+      });
+      await newUser.save();
+      res.cookie('userToken', tokenId, {
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000,
+      });
+      res
+        .status(200)
+        .json({ message: 'User registered Successfully', token: tokenId });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error });
+    console.log('error in googleAuth backend' + error);
+  }
+};
+
+export const logout = (req, res) => {
+  req.rootUser.tokens = req.rootUser.tokens.filter((e) => e.token != req.token);
+};
+export const searchUsers = async (req, res) => {
+  // const { search } = req.query;
+  const search = req.query.search
+    ? {
+        $or: [
+          { name: { $regex: req.query.search, $options: 'i' } },
+          { email: { $regex: req.query.search, $options: 'i' } },
+        ],
+      }
+    : {};
+
+  const users = await user.find(search).find({ _id: { $ne: req.rootUserId } });
+  res.status(200).send(users);
+};
+export const getUserById = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const selectedUser = await user.findOne({ _id: id }).select('-password');
+    res.status(200).json(selectedUser);
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
+};
+export const updateInfo = async (req, res) => {
+  const { id } = req.params;
+  const { bio, name } = req.body;
+  const updatedUser = await user.findByIdAndUpdate(id, { name, bio });
+  return updatedUser;
+};
+ 
+ 
+===== File: server\index.js ===== 
+import express from 'express';
+import dotenv from 'dotenv/config';
+import mongoDBConnect from './mongoDB/connection.js';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import userRoutes from './routes/user.js';
+import chatRoutes from './routes/chat.js';
+import messageRoutes from './routes/message.js';
+import * as Server from 'socket.io';
+import { spawn } from 'child_process';
+
+const app = express();
+
+// Extract allowed origins from environment variable
+const allowedOrigins = process.env.BASE_URL.split(',');
+
+const corsConfig = {
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+};
+
+const PORT = process.env.PORT || 8000;
+
+// Middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(cors(corsConfig));
+
+// Routes
+app.use('/', userRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/message', messageRoutes);
+
+// Quantum key generation endpoint
+app.get('/quantum-key', (req, res) => {
+  const pythonProcess = spawn('python', ['./quantum/quantum_api.py']);  // Correct path
+
+
+  pythonProcess.stdout.on('data', (data) => {
+    res.send(data.toString());  // Send the quantum key as response
+  });
+
+  pythonProcess.stderr.on('data', (data) => {
+    console.error(`Error: ${data}`);
+    res.status(500).send('Error generating quantum key');
+  });
+});
+
+// Database connection
+mongoose.set('strictQuery', false);
+mongoDBConnect();
+
+// Start server
+const server = app.listen(PORT, () => {
+  console.log(`Server Listening at PORT - ${PORT}`);
+});
+
+// Configure Socket.IO
+const io = new Server.Server(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: allowedOrigins,
+    credentials: true,
+  },
+});
+
+io.on('connection', (socket) => {
+  socket.on('setup', (userData) => {
+    socket.join(userData.id);
+    socket.emit('connected');
+  });
+
+  socket.on('join room', (room) => {
+    socket.join(room);
+  });
+
+  socket.on('typing', (room) => socket.in(room).emit('typing'));
+  socket.on('stop typing', (room) => socket.in(room).emit('stop typing'));
+
+  socket.on('new message', (newMessageRecieve) => {
+    const chat = newMessageRecieve.chatId;
+    if (!chat.users) console.log('chats.users is not defined');
+    chat.users.forEach((user) => {
+      if (user._id == newMessageRecieve.sender._id) return;
+      socket.in(user._id).emit('message received', newMessageRecieve);
+    });
+  });
+});
+ 
+ 
+===== File: server\middleware\user.js ===== 
+import jwt from 'jsonwebtoken';
+import user from '../models/userModel.js';
+
+export const Auth = async (req, res, next) => {
+  try {
+    let token = req.headers.authorization.split(' ')[0]; //when using browser this line
+    // let token = req.headers.authorization.split(' ')[1]; //when using postman this line
+    if (token.length < 500) {
+      const verifiedUser = jwt.verify(token, process.env.SECRET);
+      const rootUser = await user
+        .findOne({ _id: verifiedUser.id })
+        .select('-password');
+      req.token = token;
+      req.rootUser = rootUser;
+      req.rootUserId = rootUser._id;
+    } else {
+      let data = jwt.decode(token);
+      req.rootUserEmail = data.email;
+      const googleUser = await user
+        .findOne({ email: req.rootUserEmail })
+        .select('-password');
+      req.rootUser = googleUser;
+      req.token = token;
+      req.rootUserId = googleUser._id;
+    }
+    next();
+  } catch (error) {
+    // console.log(error);
+    res.json({ error: 'Invalid Token' });
+  }
+};
+ 
+ 
+===== File: server\models\chatModel.js ===== 
+import mongoose from 'mongoose';
+const chatSchema = mongoose.Schema(
+  {
+    photo: {
+      type: String,
+      default: 'https://cdn-icons-png.flaticon.com/512/9790/9790561.png',
+    },
+    chatName: {
+      type: String,
+    },
+    isGroup: {
+      type: Boolean,
+      default: false,
+    },
+    users: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    latestMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Message',
+    },
+    groupAdmin: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+const chatModel = mongoose.model('Chat', chatSchema);
+export default chatModel;
+ 
+ 
+===== File: server\models\messageModel.js ===== 
+import mongoose from "mongoose";
+const messageSchema = mongoose.Schema(
+  {
+    sender: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    message: {
+      type: String,
+      trim: true,
+    },
+    chatId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Chat",
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
+const messageModel = mongoose.model("Message", messageSchema);
+export default messageModel;
+ 
+ 
+===== File: server\models\userModel.js ===== 
+import mongoose from 'mongoose';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+const userSchema = mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    bio: {
+      type: String,
+      default: 'Available',
+    },
+    profilePic: {
+      type: String,
+      default:
+        'https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg',
+    },
+    contacts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+  },
+  {
+    timestamps: true,
+  }
+);
+userSchema.pre('save', async function (next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 12);
+  }
+  next();
+});
+userSchema.methods.generateAuthToken = async function () {
+  try {
+    let token = jwt.sign(
+      { id: this._id, email: this.email },
+      process.env.SECRET,
+      {
+        expiresIn: '24h',
+      }
+    );
+
+    return token;
+  } catch (error) {
+    console.log('error while generating token');
+  }
+};
+
+const userModel = mongoose.model('User', userSchema);
+export default userModel;
+ 
+ 
+===== File: server\mongoDB\connection.js ===== 
+import mongoose from "mongoose";
+const mongoDBConnect = () => {
+  try {
+    mongoose.connect(process.env.URL, {
+      useUnifiedTopology: true,
+      useNewUrlParser: true,
+    });
+    console.log("MongoDB - Connected");
+  } catch (error) {
+    console.log("Error - MongoDB Connection " + error);
+  }
+};
+export default mongoDBConnect;
+ 
+ 
+===== File: server\package.json ===== 
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "arrify": "^3.0.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "forwarded": "^0.2.0",
+    "gcp-metadata": "^6.1.0",
+    "google-auth-library": "^8.7.0",
+    "gtoken": "^7.1.0",
+    "ipaddr.js": "^2.2.0",
+    "jsonwebtoken": "^9.0.0",
+    "jwt-check-expiration": "^1.0.5",
+    "jwt-decode": "^3.1.2",
+    "lru-cache": "^11.0.2",
+    "mongoose": "^6.8.2",
+    "negotiator": "^1.0.0",
+    "nodemon": "^3.0.1",
+    "socket.io": "^4.6.1"
+  }
+}
+ 
+ 
+===== File: server\routes\chat.js ===== 
+import express from 'express';
+import { Auth } from '../middleware/user.js';
+const router = express.Router();
+
+import {
+  accessChats,
+  fetchAllChats,
+  creatGroup,
+  renameGroup,
+  addToGroup,
+  removeFromGroup,
+} from '../controllers/chatControllers.js';
+router.post('/', Auth, accessChats);
+router.get('/', Auth, fetchAllChats);
+router.post('/group', Auth, creatGroup);
+router.patch('/group/rename', Auth, renameGroup);
+router.patch('/groupAdd', Auth, addToGroup);
+router.patch('/groupRemove', Auth, removeFromGroup);
+router.delete('/removeuser', Auth);
+
+export default router;
+ 
+ 
+===== File: server\routes\message.js ===== 
+import express from "express";
+const router = express.Router();
+import { sendMessage, getMessages } from "../controllers/messageControllers.js";
+import { Auth } from "../middleware/user.js";
+router.post("/", Auth, sendMessage);
+router.get("/:chatId", Auth, getMessages);
+export default router;
+ 
+ 
+===== File: server\routes\user.js ===== 
+import express from 'express';
+import {
+  register,
+  login,
+  validUser,
+  googleAuth,
+  logout,
+  searchUsers,
+  updateInfo,
+  getUserById,
+} from '../controllers/user.js';
+import { Auth } from '../middleware/user.js';
+const router = express.Router();
+router.post('/auth/register', register);
+router.post('/auth/login', login);
+router.get('/auth/valid', Auth, validUser);
+router.get('/auth/logout', Auth, logout);
+router.post('/api/google', googleAuth);
+router.get('/api/user?', Auth, searchUsers);
+router.get('/api/users/:id', Auth, getUserById);
+router.patch('/api/users/update/:id', Auth, updateInfo);
+export default router;
+ 
+ 
